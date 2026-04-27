@@ -129,7 +129,7 @@ def load_or_build_rho_cache(*, hstar: float, vw: float, beta_over_h: float) -> t
     key = _cache_key(hstar, vw, beta_over_h)
     path = CACHEDIR / f"rho_pt_{key}.npz"
     if path.exists():
-        data = np.load(path)
+        data = np.load(path, allow_pickle=False)
         return np.asarray(data["theta"], dtype=float), np.asarray(data["rho"], dtype=float), path
     theta = build_master_theta_grid()
     t0 = time.perf_counter()
