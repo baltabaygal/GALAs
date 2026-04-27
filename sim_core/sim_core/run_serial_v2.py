@@ -11,12 +11,7 @@ Key changes:
 
 import numpy as np
 import matplotlib.pyplot as plt
-from axion_sim_v9 import (
-    create_simulation_pt_at_zero,
-    calculate_mass_field_snapshot_subsampled,
-    EnergyCalculator,
-    get_bubble_mask_snapshot
-)
+from axion_sim_v9 import create_simulation_pt_at_zero
 import os
 import json
 from dataclasses import asdict
