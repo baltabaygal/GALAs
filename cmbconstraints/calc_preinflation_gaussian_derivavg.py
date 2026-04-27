@@ -98,7 +98,7 @@ def load_or_build_dlnrho_cache(*, hstar: float, vw: float, beta_over_h: float) -
     key = _cache_key(hstar, vw, beta_over_h)
     path = CACHEDIR / f"dlnrho_pt_{key}.npz"
     if path.exists():
-        data = np.load(path)
+        data = np.load(path, allow_pickle=False)
         return DerivAvgCache(
             theta_master=np.asarray(data["theta"], dtype=float),
             rho_master=np.asarray(data["rho"], dtype=float),
