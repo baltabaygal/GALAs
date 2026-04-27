@@ -60,10 +60,10 @@ def run_single_sim_worker(params):
         # V8: Energy is already calculated and stored in energy_history
         if results['times_cosmic'] and results['energy_history']:
             final_time = results['config'].m0 * results['times_cosmic'][-1]
-            
+
             # Get final energy from the stored history
             final_energy = results['energy_history'][-1]
-            
+
             config_dict = asdict(sim.config)
 
             return convert_to_native_types({
@@ -84,11 +84,11 @@ def run_single_sim_worker(params):
             })
 
         return {
-            'status': 'FAILED', 
-            'H_PT': H_PT, 
+            'status': 'FAILED',
+            'H_PT': H_PT,
             'beta_over_H': beta_over_H,
-            'theta0_initial': theta0, 
-            'with_pt': with_pt, 
+            'theta0_initial': theta0,
+            'with_pt': with_pt,
             'realization': realization
         }
 
@@ -128,7 +128,6 @@ class SerialParameterSweep:
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(os.path.join(output_dir, 'representative_plots'), exist_ok=True)
-        os.makedirs(os.path.join(output_dir, 'final_energies'), exist_ok=True)
 
     def run_serial_sweep(self, H_PT_values, beta_over_H_values, theta0_values, num_realizations):
         """
@@ -173,19 +172,17 @@ class SerialParameterSweep:
         for idx, task in enumerate(tasks, 1):
             H_PT, beta_over_H, theta0, with_pt, real = task
             print(f"\n[{idx}/{len(tasks)}] Running: H_PT={H_PT:.3f}, β/H={beta_over_H:.2f}, θ₀={theta0:.3f}, PT={with_pt}, real={real}")
-            
+
             result = run_single_sim_worker(task)
 
             if result['status'] == 'SUCCESS':
                 all_results.append(result)
-                if with_pt:
-                    filename = f'pt_HPT_{H_PT:.3f}_beta_{beta_over_H:.2f}_theta_{theta0:.3f}_real_{real}.json'
-                else:
-                    filename = f'no_pt_HPT_{H_PT:.3f}_theta_{theta0:.3f}.json'
-                save_path = os.path.join(self.output_dir, 'final_energies', filename)
-                with open(save_path, 'w') as f:
-                    json.dump(result, f, indent=2)
                 print(f"  ✓ Success - Total energy: {result['total']:.6e}")
+
+                # Persistence: incrementally save results every 10 tasks
+                if len(all_results) % 10 == 0:
+                    with open(os.path.join(self.output_dir, 'all_results.json'), 'w') as f:
+                        json.dump(all_results, f, indent=2)
             else:
                 failed_tasks.append(task)
                 error_msg = result.get('error', result['status'])
@@ -211,6 +208,10 @@ class SerialParameterSweep:
         with open(os.path.join(self.output_dir, 'run_summary.json'), 'w') as f:
             json.dump(summary, f, indent=2)
 
+        # Batch save all results to a single file
+        with open(os.path.join(self.output_dir, 'all_results.json'), 'w') as f:
+            json.dump(all_results, f, indent=2)
+
         print(f"\n{'='*70}")
         print(f"Serial sweep complete!")
         print(f"  Successful: {len(all_results)}/{len(tasks)}")
@@ -234,7 +235,7 @@ class SerialParameterSweep:
         for H_PT in H_PT_values:
             for theta0 in plot_thetas:
                 print(f"\nPlotting H_PT={H_PT:.3f}, θ₀={theta0:.3f}")
-                
+
                 # No-PT simulation
                 sim_no_pt, tau_final = create_simulation_pt_at_zero(
                     H_PT=H_PT, beta=0.0,
@@ -275,7 +276,7 @@ class SerialParameterSweep:
 
         # With-PT data - V8: Use energy_history directly
         config_pt = results_pt['config']
-        
+
         # Extract data from energy_history
         energies_pt = results_pt['energy_history']
         times_pt = config_pt.m0 * np.array([e['t_cosmic'] for e in energies_pt])
@@ -289,7 +290,7 @@ class SerialParameterSweep:
 
         # No-PT data - V8: Use energy_history directly
         config_no_pt = results_no_pt['config']
-        
+
         energies_no_pt = results_no_pt['energy_history']
         times_no_pt = config_no_pt.m0 * np.array([e['t_cosmic'] for e in energies_no_pt])
         scale_factors_no_pt = np.array([e['scale_factor'] for e in energies_no_pt])
