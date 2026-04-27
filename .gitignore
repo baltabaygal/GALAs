@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDEs
+.vscode/
+.idea/
+
+# Session/AI Context
+GEMINI.md
+paper_codes
+.gemini/
+
+# Ignored Research/Analysis Directories
+best_model/
+best_model_2nd_order/
+best_model_2nd_order_effective_lattice/
+best_model_with_v1_refit/
+broken_powerlaw_fits/
+common/
+fit_plots/
+isocurvature_calc/
+ode/
+ode_plots/
+outputs/
+paper_plots/
+per_theta0_fit/
+plots_for_paper/
+fitted_values.md
+
+# Sub-directory specific ignores (Keep folders but ignore outputs)
+cmbconstraints/cache/
+cmbconstraints/outputs/
+isocurvature/outputs/
+xi_model/outputs/
+xi_model/.pytest_cache/
