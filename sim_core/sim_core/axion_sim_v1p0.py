@@ -322,9 +322,18 @@ class AxionSimulation:
         self.history = {'tau': [], 't': [], 'energy': [], 'fv_frac': [], 'n_bubbles': []}
 
     def _laplacian(self, field):
-        """Compute Laplacian using FFT."""
-        field_k = self.fft.forward(field)
-        return self.fft.backward(-self.K_SQ * field_k).real
+        """Compute Laplacian using chosen method."""
+        if self.config.use_fft_laplacian:
+            field_k = self.fft.forward(field)
+            return self.fft.backward(-self.K_SQ * field_k).real
+        else:
+            dx = self.dx
+            def laplacian_4th_order(f, axis):
+                rolled = lambda shift: np.roll(f, shift, axis=axis)
+                return (-rolled(2) + 16*rolled(1) - 30*f + 16*rolled(-1) - rolled(-2)) / (12 * dx**2)
+            return (laplacian_4th_order(field, 0) +
+                    laplacian_4th_order(field, 1) +
+                    laplacian_4th_order(field, 2))
 
     def _get_timestep(self, tau):
         # CFL Condition: dt < dx / sqrt(3)
