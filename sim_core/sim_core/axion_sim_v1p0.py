@@ -48,7 +48,7 @@ os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 
 # Configure Numba threading (adjust based on target hardware)
-nb.set_num_threads(8)
+nb.set_num_threads(4)
 
 # Configure FFTW
 pyfftw.config.NUM_THREADS = 1
@@ -397,7 +397,7 @@ class AxionSimulation:
         kin = 0.5 * np.mean(self.theta_p**2) / (a**2)
         pot = np.mean(mass_sq * (1 - np.cos(self.theta)))
         # Gradient energy approximation via spectral power
-        grad = 0.5 * np.mean(self._laplacian(self.theta) * self.theta) / (a**2) # Viral-like term
+        grad = -0.5 * np.mean(self._laplacian(self.theta) * self.theta) / (a**2) # Viral-like term
         
         self.history['tau'].append(tau)
         self.history['t'].append(self.cosmo.cosmic_time(tau))
@@ -416,6 +416,7 @@ def create_simulation(H_PT: float, beta_H: float, **kwargs):
         beta=beta_H * H_PT, 
         tau0=cosmo.tau_PT,
         t_0=cosmo.t_PT,
+        Gamma_0=H_PT**4,
         **kwargs
     )
     return AxionSimulation(config, cosmo)

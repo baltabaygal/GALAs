@@ -13,6 +13,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from axion_sim_v1p0 import create_simulation
 
+def convert_to_native(obj):
+    """Recursively convert numpy types to native Python types for JSON serialization."""
+    if isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {k: convert_to_native(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_to_native(item) for item in obj]
+    return obj
+
 def run_and_plot(H_PT=1.0, beta_H=10.0, theta0=2.0, Ngrid=32, tau_max=5.0):
     print(f"--- Running Single Simulation ---")
     print(f"Parameters: H_PT={H_PT}, beta/H={beta_H}, theta0={theta0}, N={Ngrid}")
@@ -80,7 +94,7 @@ def run_and_plot(H_PT=1.0, beta_H=10.0, theta0=2.0, Ngrid=32, tau_max=5.0):
     }
     
     with open("single_sim_history.json", "w") as f:
-        json.dump(history_json, f, indent=2)
+        json.dump(convert_to_native(history_json), f, indent=2)
     print("History saved to: single_sim_history.json")
 
 if __name__ == "__main__":
