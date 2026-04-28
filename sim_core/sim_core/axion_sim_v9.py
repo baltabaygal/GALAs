@@ -27,7 +27,7 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 
 # Allow Numba to use all threads safely:
 import numba
-numba.set_num_threads(8)   # or number of cores you have
+numba.set_num_threads(4)   # or number of cores you have
 
 
 import numba as nb
